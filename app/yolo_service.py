@@ -4,10 +4,10 @@ import numpy as np
 import base64
 import logging
 
-# Configuração de logs
+confidence_threshold = 0.5
 logger = logging.getLogger(__name__)
 
-model = YOLO("yolov8s.pt")  # Certifique-se de ter esse modelo baixado
+model = YOLO("yolo11m.pt")  # Certifique-se de ter esse modelo baixado
 cap = cv2.VideoCapture(1)   # ou coloque a URL/IP da câmera
 
 def get_person_snapshot_base64():
@@ -21,7 +21,7 @@ def get_person_snapshot_base64():
 
     detected_person = False
     for box in results.boxes:
-        if int(box.cls[0]) == 0:  # class 0 == person
+        if int(box.cls[0]) == 0 and box.conf[0] > confidence_threshold:  # class 0 == person
             detected_person = True
             xyxy = box.xyxy[0].cpu().numpy().astype(int)
             cv2.rectangle(frame, (xyxy[0], xyxy[1]), (xyxy[2], xyxy[3]), (0, 255, 0), 2)
