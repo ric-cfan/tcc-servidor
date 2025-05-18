@@ -7,7 +7,7 @@ import logging
 confidence_threshold = 0.5
 logger = logging.getLogger(__name__)
 
-model = YOLO("yolo11m.pt")  # Certifique-se de ter esse modelo baixado
+model = YOLO("yolo12s.pt")  # Certifique-se de ter esse modelo baixado
 cap = cv2.VideoCapture(1)   # ou coloque a URL/IP da câmera
 
 def get_person_snapshot_base64():

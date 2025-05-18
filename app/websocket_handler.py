@@ -23,7 +23,8 @@ async def handle_websocket(websocket: WebSocket):
                     "date": now.strftime("%d/%m/%Y"),
                     "time": now.strftime("%H:%M:%S"),
                     "timezone": str(now.tzinfo),
-                    "image_base64": snapshot_b64
+                    "image_base64": snapshot_b64,
+                    "camera": "1",
                 }
                 json_data = json.dumps(data)
 
