@@ -6,7 +6,7 @@ from app.yolo_service import CameraService
 app = FastAPI()
 
 # Lista de IDs das câmeras disponíveis
-camera_ids = [1, 2]
+camera_ids = [0, 1]
 
 # Inicializa serviços por câmera
 camera_services = {camera_id: CameraService(camera_id) for camera_id in camera_ids}

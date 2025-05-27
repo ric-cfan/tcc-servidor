@@ -2,6 +2,7 @@ import cv2
 from ultralytics import YOLO
 import base64
 import logging
+import numpy as np
 
 confidence_threshold = 0.5
 logger = logging.getLogger(__name__)
@@ -12,11 +13,20 @@ class CameraService:
         self.cap = cv2.VideoCapture(camera_id)
         self.model = YOLO("yolo12s.pt")
 
+    def apply_night_vision_filter(self, frame):
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        contrasted = cv2.equalizeHist(gray)
+        green_tinted = cv2.applyColorMap(contrasted, cv2.COLORMAP_SUMMER)
+        return green_tinted
+
     def get_person_snapshot_base64(self):
         success, frame = self.cap.read()
         if not success:
             logger.error(f"Erro ao capturar frame da câmera {self.camera_id}")
             return None
+
+        #visao noturna
+        #frame = self.apply_night_vision_filter(frame)
 
         results = self.model(frame)[0]
         logger.info(f"YOLO rodou sobre o frame da câmera {self.camera_id}.")
