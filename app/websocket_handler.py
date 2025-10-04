@@ -10,6 +10,15 @@ logger = logging.getLogger(__name__)
 async def handle_camera_websocket(websocket: WebSocket, camera_service, camera_id: str):
     await websocket.accept()
     logger.info(f"Novo cliente conectado na câmera {camera_id} via WebSocket")
+    
+    # Enviar mensagem de conexão inicial
+    connection_data = {
+        "type": "connection",
+        "camera": camera_id,
+        "status": "connected",
+        "message": f"Câmera {camera_id} conectada com sucesso"
+    }
+    await websocket.send_text(json.dumps(connection_data))
 
     try:
         while True:
@@ -18,6 +27,7 @@ async def handle_camera_websocket(websocket: WebSocket, camera_service, camera_i
             if snapshot_b64:
                 now = datetime.now().astimezone()
                 data = {
+                    "type": "detection",
                     "date": now.strftime("%d/%m/%Y"),
                     "time": now.strftime("%H:%M:%S"),
                     "timezone": str(now.tzinfo),
