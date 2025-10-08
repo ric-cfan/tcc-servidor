@@ -4,21 +4,27 @@ from datetime import datetime
 from fastapi import WebSocket, WebSocketDisconnect
 import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def handle_camera_websocket(websocket: WebSocket, camera_service, camera_id: str):
     await websocket.accept()
     logger.info(f"Novo cliente conectado na câmera {camera_id} via WebSocket")
     
-    # Enviar mensagem de conexão inicial
+    # Verifica status real da câmera
+    camera_status = camera_service.get_camera_status()
+    
     connection_data = {
         "type": "connection",
         "camera": camera_id,
-        "status": "connected",
+        "status": camera_status,
         "message": f"Câmera {camera_id} conectada com sucesso"
     }
     await websocket.send_text(json.dumps(connection_data))
+    
+    if camera_status == "error":
+        logger.error(f"Câmera {camera_id} com erro. Fechando conexão.")
+        await websocket.close()
+        return
 
     try:
         while True:
@@ -39,7 +45,13 @@ async def handle_camera_websocket(websocket: WebSocket, camera_service, camera_i
                 await websocket.send_text(json_data)
                 await asyncio.sleep(5)
             else:
-                logger.info(f"Câmera {camera_id}: Nenhuma pessoa detectada. Tentando novamente...")
                 await asyncio.sleep(1)
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, asyncio.CancelledError):
         logger.info(f"Cliente desconectado da câmera {camera_id}")
+    except Exception as e:
+        logger.error(f"Erro no WebSocket câmera {camera_id}: {e}")
+    finally:
+        try:
+            await websocket.close()
+        except:
+            pass
